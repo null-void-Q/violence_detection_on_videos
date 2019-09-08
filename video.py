@@ -11,7 +11,9 @@ def readVideo(vid,clipDuration):
     while(cap.isOpened()):
         ret, frame = cap.read()
         if ret == True:
-            frame=cv2.resize(frame, (224, 224))
+            frame = cv2.resize(frame, (342,256)) 
+            frame = (frame/255.)*2 - 1
+            frame = frame[16:240, 59:283] 
             clip.append(frame)  
             i+=1
             if(i == clipDuration):
@@ -22,11 +24,7 @@ def readVideo(vid,clipDuration):
             break   
 
     return np.asarray(video, dtype=np.float32)       
-    
-vid = '/run/media/null/HD/Kinetics_400_Validation/abseiling/3caPS4FHFF8_000036_000046.mp4'
 
-
-print(readVideo(vid,64).shape)
 
 
 
