@@ -5,26 +5,29 @@ import os
 
 
 vid = {'video': '/run/media/null/HD/Kinetics_400_Validation/abseiling/v_Ea9flmoHM_000069_000079.mp4', 'start_frame': 256, 'label':0}
-clip = []
-cap = cv2.VideoCapture(vid['video'])
-if (cap.isOpened() == False): 
-     print("Error opening video stream or file ",vid['video'])
-     exit()
-cap.set(cv2.CAP_PROP_POS_FRAMES ,vid['start_frame'])
-while(cap.isOpened()):
-     ret, frame = cap.read()
-     if ret == True:
-          frame = cv2.resize(frame, (342,256), interpolation=cv2.INTER_LINEAR) 
-          frame = (frame/255.)*2.0 - 1.0
-          frame = frame[16:240, 59:283] 
-          clip.append(frame)  
-     else:
-          break
 
-clip1 = np.asarray(clip, dtype=np.float32)
-if len(clip) < 64 :
-     tmp = np.zeros(shape=(64 - len(clip1),224,224,3),dtype=np.float32)
-     clip =np.concatenate((clip1,tmp)) 
+def readVideoClip(video_fragment, maxClipDuration):
+     clip = []
+     cap = cv2.VideoCapture(video_fragment['video'])
+     if (cap.isOpened() == False): 
+          print("Error opening video stream or file ",video_fragment['video'])
+          exit()
+     cap.set(cv2.CAP_PROP_POS_FRAMES ,video_fragment['start_frame'])
+     while(cap.isOpened()):
+          ret, frame = cap.read()
+          if ret == True:
+               frame = cv2.resize(frame, (342,256), interpolation=cv2.INTER_LINEAR) 
+               frame = (frame/255.)*2.0 - 1.0
+               frame = frame[16:240, 59:283] 
+               clip.append(frame)  
+          else:
+               break
+
+     clip = np.asarray(clip, dtype=np.float32)
+     if len(clip) < maxClipDuration :
+          tmp = np.zeros(shape=(maxClipDuration - len(clip),224,224,3),dtype=np.float32)
+          clip =np.concatenate((clip,tmp)) 
+     return clip     
                        
 
 def extractClipsFromVideo(video, maxClipDuration, label):
