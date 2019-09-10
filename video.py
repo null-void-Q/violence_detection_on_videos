@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+from data import preprocess_input
 
 def readVideo(vid,clipDuration):   
     video = []
@@ -11,9 +12,7 @@ def readVideo(vid,clipDuration):
     while(cap.isOpened()):
         ret, frame = cap.read()
         if ret == True:
-            frame = cv2.resize(frame, (342,256), interpolation=cv2.INTER_LINEAR) 
-            frame = (frame/255.)*2. - 1.0
-            frame = frame[16:240, 59:283] 
+            frame = preprocess_input(frame)
             clip.append(frame)  
             i+=1
             if(i == clipDuration):
