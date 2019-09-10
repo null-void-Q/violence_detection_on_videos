@@ -11,8 +11,8 @@ def readVideo(vid,clipDuration):
     while(cap.isOpened()):
         ret, frame = cap.read()
         if ret == True:
-            frame = cv2.resize(frame, (342,256)) 
-            frame = (frame/255.)*2. - 0.5
+            frame = cv2.resize(frame, (342,256), interpolation=cv2.INTER_LINEAR) 
+            frame = (frame/255.)*2. - 1.0
             frame = frame[16:240, 59:283] 
             clip.append(frame)  
             i+=1
