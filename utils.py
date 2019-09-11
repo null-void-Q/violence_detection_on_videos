@@ -10,12 +10,6 @@ def getTopNindecies(array,n):
     sorted_indices = np.argsort(array)[::-1]
     return sorted_indices[:n]
     
-def fuzeScores(clips):
-    avgScores = np.zeros(len(clips[0]['scores']), dtype=float)
-    for clip in clips:
-        avgScores = np.add(avgScores, clip['scores'])
-        avgScores /= len(clips)
-    return avgScores
 
 def softmax(logits):
     logits = logits.astype(np.float64)
