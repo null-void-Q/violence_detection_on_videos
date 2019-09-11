@@ -17,11 +17,15 @@ def readVideoClip(video_fragment, maxClipDuration):
           print("Error opening video stream or file ",video_fragment['video'])
           exit()
      cap.set(cv2.CAP_PROP_POS_FRAMES ,video_fragment['start_frame'])
+     f=0
      while(cap.isOpened()):
           ret, frame = cap.read()
           if ret == True:
                frame = preprocess_input(frame)
-               clip.append(frame)  
+               clip.append(frame)
+               f+=1
+               if f > 63:
+                   break  
           else:
                break
 
@@ -61,21 +65,20 @@ def generateDatasetList(datasetPath, maxClipDuration):
 
 class DataGenerator(keras.utils.Sequence):
     'Generates data for Keras'
-    def __init__(self, list_IDs, labels, batch_size=32, dim=(224,224,3), n_channels=1,
-                 n_classes=400, shuffle=True):
+    def __init__(self, list_IDs, numOfFrames ,batch_size=32, dim=(224,224,3),
+                 n_classes=400, shuffle=False):
         'Initialization'
         self.dim = dim
+        self.numOfFrames = numOfFrames
         self.batch_size = batch_size
-        self.labels = labels
         self.list_IDs = list_IDs
-        self.n_channels = n_channels
         self.n_classes = n_classes
         self.shuffle = shuffle
         self.on_epoch_end()
 
     def __len__(self):
         'Denotes the number of batches per epoch'
-        return int(np.floor(len(self.list_IDs) / self.batch_size))
+        return int(np.ceil(len(self.list_IDs) / self.batch_size))
 
     def __getitem__(self, index):
         'Generate one batch of data'
@@ -97,17 +100,16 @@ class DataGenerator(keras.utils.Sequence):
             np.random.shuffle(self.indexes)
 
     def __data_generation(self, list_IDs_temp):
-        'Generates data containing batch_size samples' # X : (n_samples, *dim, n_channels)
         # Initialization
-        X = np.empty((self.batch_size, *self.dim, self.n_channels))
+        X = np.empty((self.batch_size, self.numOfFrames, *self.dim), dtype=np.float32)
         y = np.empty((self.batch_size), dtype=int)
 
         # Generate data
         for i, ID in enumerate(list_IDs_temp):
             # Store sample
-            X[i,] = np.load('data/' + ID + '.npy')
+            X[i] = readVideoClip(ID,self.numOfFrames)
 
             # Store class
-            y[i] = self.labels[ID]
-
+            y[i] = ID['label']
+        
         return X, keras.utils.to_categorical(y, num_classes=self.n_classes)

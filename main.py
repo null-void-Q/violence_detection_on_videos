@@ -1,8 +1,11 @@
 import numpy as np
 from i3d_inception import Inception_Inflated3d
 from video import readVideo
+from data import DataGenerator
+from data import generateDatasetList
+from utils import getPredictions
 
-NUM_FRAMES = 64
+INPUT_FRAMES = 64
 FRAME_HEIGHT = 224
 FRAME_WIDTH = 224
 NUM_RGB_CHANNELS = 3
@@ -15,21 +18,24 @@ kinetics_classes = [x.strip() for x in open('label_map.txt', 'r')]
 rgb_model = Inception_Inflated3d(
                 include_top=True,
                 weights='rgb_imagenet_and_kinetics',
-                input_shape=(NUM_FRAMES, FRAME_HEIGHT, FRAME_WIDTH, NUM_RGB_CHANNELS),
+                input_shape=(INPUT_FRAMES, FRAME_HEIGHT, FRAME_WIDTH, NUM_RGB_CHANNELS),
                 classes=NUM_CLASSES)
 
 
-vid = 'D:\\Kinetics_400_Validation\\arm wrestling\\5JzkrOVhPOw_000027_000037.mp4'
+validationPath = '/home/null/Desktop/HAR/test_dir/'
 
-input = readVideo(vid,NUM_FRAMES)
+print('\n\n\ngenerating Annotation List...')
+annotationList = generateDatasetList(validationPath,INPUT_FRAMES)
+print('creating data generator...')
+dataGenerator = DataGenerator(annotationList,INPUT_FRAMES,batch_size=10)
+print('starting test...')
+out_logits = rgb_model.predict_generator(dataGenerator, steps=None, max_queue_size=10, workers=1, use_multiprocessing=False, verbose=1)
+out_logits = out_logits[:len(annotationList)]
+predictions = getPredictions(out_logits)
+predictions = predictions[::-1]
 
-rgb_logits = rgb_model.predict(input)
-
-
-sample_logits = np.asarray(rgb_logits[0],dtype=np.float64) 
-sample_predictions = np.exp(sample_logits) / np.sum(np.exp(sample_logits))
-
-sorted_indices = np.argsort(sample_predictions)[::-1]
-print('\nTop classes and probabilities')
-for index in sorted_indices[:5]:
-    print(sample_predictions[index],kinetics_classes[index])
+print(predictions.shape, len(annotationList))
+for pred in predictions:
+    sorted_preds_indices = np.argsort(pred)[::-1]
+    for index in sorted_preds_indices[:1]:
+         print(pred[index], kinetics_classes[index])
