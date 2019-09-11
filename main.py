@@ -1,9 +1,7 @@
 import numpy as np
 from i3d_inception import Inception_Inflated3d
-from video import readVideo
-from data import DataGenerator
-from data import generateDatasetList
-from utils import getPredictions
+from test import test
+
 
 INPUT_FRAMES = 64
 FRAME_HEIGHT = 224
@@ -22,20 +20,10 @@ rgb_model = Inception_Inflated3d(
                 classes=NUM_CLASSES)
 
 
-validationPath = '/home/null/Desktop/HAR/test_dir/'
+test(rgb_model,'/home/null/Desktop/HAR/test_dir/',kinetics_classes)
 
-print('\n\n\ngenerating Annotation List...')
-annotationList = generateDatasetList(validationPath,INPUT_FRAMES)
-print('creating data generator...')
-dataGenerator = DataGenerator(annotationList,INPUT_FRAMES,batch_size=10)
-print('starting test...')
-out_logits = rgb_model.predict_generator(dataGenerator, steps=None, max_queue_size=10, workers=1, use_multiprocessing=False, verbose=1)
-out_logits = out_logits[:len(annotationList)]
-predictions = getPredictions(out_logits)
-predictions = predictions[::-1]
-
-print(predictions.shape, len(annotationList))
-for pred in predictions:
-    sorted_preds_indices = np.argsort(pred)[::-1]
-    for index in sorted_preds_indices[:1]:
-         print(pred[index], kinetics_classes[index])
+# print(predictions.shape, len(annotationList))
+# for pred in predictions:
+#     sorted_preds_indices = np.argsort(pred)[::-1]
+#     for index in sorted_preds_indices[:1]:
+#          print(pred[index], kinetics_classes[index])

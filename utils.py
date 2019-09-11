@@ -1,12 +1,15 @@
 import numpy as np
-
-def generateFormatedOutput(predictions, annotationList):
-    output= []
+import json
 
 
+def writeJsontoFile(fileName, jsonArray):
+    with open(fileName, 'w') as f: 
+            json.dump(jsonArray, f, indent=4)  
 
-    return output
-
+def getTopNindecies(array,n):
+    sorted_indices = np.argsort(array)[::-1]
+    return sorted_indices[:n]
+    
 def fuzeScores(clips):
     avgScores = np.zeros(len(clips[0]['scores']), dtype=float)
     for clip in clips:
