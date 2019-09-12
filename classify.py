@@ -34,13 +34,18 @@ def classify(videoPath, model):
     kinetics_classes = [x.strip() for x in open('label_map.txt', 'r')]
 
     video = readVideo(videoPath)
-    out_logits = model.predict(video, batch_size=len(video), verbose=0, steps=None, callbacks=None)
+    out_logits = model.predict(video, batch_size=len(video), verbose=0, steps=None)
     predictions = getPredictions(out_logits)
     print('Top 5 predictions: ')
+    final_prediction = np.zeros(len(predictions[0]))
     for pred in predictions:
-        top5indices = getTopNindecies(pred,5)
-        for index in top5indices:
-            print(pred[index], kinetics_classes[index])
+        final_prediction+=pred
+    final_prediction/=len(predictions)
+
+
+    top5indices = getTopNindecies(final_prediction,5)
+    for index in top5indices:
+        print(final_prediction[index], kinetics_classes[index])
 
 
 if __name__ == "__main__":
