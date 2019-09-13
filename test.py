@@ -8,7 +8,6 @@ from utils import getPredictions, getTopNindecies ,writeJsontoFile
 
 def generateFormatedOutput(predictions, annotationList, classes, topNpredictions = 10):
     output= []
-    predictions = predictions[::-1]
     currentVideo = {'video': annotationList[0]['video'], 'predictions':np.zeros(len(predictions[0]))}
     c = 0
     for i,clip in enumerate(annotationList):
