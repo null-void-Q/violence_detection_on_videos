@@ -4,10 +4,50 @@ import numpy as np
 import math
 import os
 
+
+
+def image_resize(image, width = None, height = None, inter = cv2.INTER_LINEAR):
+    # initialize the dimensions of the image to be resized and
+    # grab the image size
+    dim = None
+    (h, w) = image.shape[:2]
+
+    # if both the width and height are None, then return the
+    # original image
+    if width is None and height is None:
+        return image
+
+    # check to see if the width is None
+    if width is None:
+        # calculate the ratio of the height and construct the
+        # dimensions
+        r = height / float(h)
+        dim = (int(w * r), height)
+
+    # otherwise, the height is None
+    else:
+        # calculate the ratio of the width and construct the
+        # dimensions
+        r = width / float(w)
+        dim = (width, int(h * r))
+
+    # resize the image
+    resized = cv2.resize(image, dim, interpolation = inter)
+
+    # return the resized image
+    return resized
+
 def preprocess_input(img):
-    frame = cv2.resize(img, (342,256), interpolation=cv2.INTER_LINEAR) 
+    if(img.shape[0] > img.shape[1]):
+          frame = image_resize(img,width=256)
+    else:
+          frame = image_resize(img,height=256)  
+
     frame = (frame/255.)*2.0 - 1.0
-    frame = frame[16:240, 59:283]  
+    h,w = frame.shape[:2]
+    y = int((h - 224)/2)
+    x = int((w-224)/2)
+    frame = frame[y:(224+y), x:(224+x)]  
     return frame
 
 def readVideoClip(video_fragment, maxClipDuration):
@@ -46,7 +86,7 @@ def extractClipsFromVideo(video, maxClipDuration, label):
      numOfClips = math.ceil(numOfFrames/maxClipDuration)
      lis = []
      for i in range(numOfClips):
-          lis.append({'video':video, 'start_frame':i*maxClipDuration, 'label':label})
+          lis.append({'video':video.replace('\\','/'), 'start_frame':i*maxClipDuration, 'label':label})
      return lis 
     
 def generateDatasetList(datasetPath, maxClipDuration):

@@ -20,7 +20,7 @@ rgb_model = Inception_Inflated3d(
                 classes=NUM_CLASSES)
 
 
-test(rgb_model,'/run/media/null/HD/Kinetics_400_Validation/',kinetics_classes)
+test(rgb_model,'C:/Users/Void/Desktop/test_dir',kinetics_classes,batchSize=4)
 
 # print(predictions.shape, len(annotationList))
 # for pred in predictions:
