@@ -8,24 +8,23 @@ def centerCrop(image,dim = 224):
     h,w = image.shape[:2]
     y = int((h - dim)/2)
     x = int((w-dim)/2)
-
     return image[y:(dim+y), x:(dim+x)]  
 
 
-def imageResize(image, minimumDimension, inter = cv2.INTER_LINEAR):
+def imageResize(image, dim, inter = cv2.INTER_LINEAR):
 
-    dim = None
+    reDim = None
     (h, w) = image.shape[:2]
 
     
     if(h > w):
-        r = minimumDimension / float(w)
-        dim = (minimumDimension, int(h * r))
+        r = dim / float(w)
+        reDim = (dim, int(h * r))
     else:      
-        r = minimumDimension / float(h)
-        dim = (int(w * r), minimumDimension)
+        r = dim / float(h)
+        reDim = (int(w * r), dim)
 
-    resized = cv2.resize(image, dim, interpolation = inter)
+    resized = cv2.resize(image, reDim, interpolation = inter)
 
     return resized
 
@@ -39,12 +38,11 @@ def getTopNindecies(array,n):
     
 
 def softmax(logits):
-    logits = logits.astype(np.float64)
     return np.exp(logits) / np.sum(np.exp(logits))
 
 
 def getPredictions(logits):
-    predictions = np.empty(logits.shape)
+    predictions = np.empty(logits.shape,dtype=np.float32)
     for i in range(len(logits)):
         predictions[i] = softmax(logits[i])
     return predictions    

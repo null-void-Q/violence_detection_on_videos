@@ -20,7 +20,7 @@ def generateFormatedOutput(predictions, annotationList, classes, topNpredictions
              currentPredictions = []
              for index in topPredictions:
                 label = classes[index]
-                score = currentVideo['predictions'][index]
+                score = currentVideo['predictions'][index].astype('float')
                 currentPredictions.append({'label':label, 'score':score})
              vidPath = currentVideo['video'].split('/')
              video = vidPath[len(vidPath)-1][:-18]   
@@ -47,5 +47,4 @@ def test (model, testDirectory, classList, INPUT_FRAMES = 64, batchSize = 10):
     predictions = getPredictions(out_logits)
 
     output = generateFormatedOutput(predictions,annotationList,classList)
-
     writeJsontoFile('results.json',output)

@@ -8,11 +8,11 @@ from utils import imageResize, centerCrop
 
 def preprocess_input(img):
     frame = imageResize(img,256)
-    frame = (frame/255.)*2.0 - 1.0
-    frame = centerCrop(frame,224)  
+    frame = centerCrop(frame,224)
+    frame = (frame/255.)*2 - 1  
     return frame
 
-def readVideoClip(video_fragment, maxClipDuration):
+def readVideoClip(video_fragment, maxClipDuration = 64):
      clip = []
      cap = cv2.VideoCapture(video_fragment['video'])
      if (cap.isOpened() == False): 
