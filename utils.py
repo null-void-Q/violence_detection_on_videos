@@ -38,7 +38,8 @@ def getTopNindecies(array,n):
     
 
 def softmax(logits):
-    return np.exp(logits) / np.sum(np.exp(logits))
+    logits = logits.astype(np.float64)
+    return (np.exp(logits) / np.sum(np.exp(logits))).astype(np.float32)
 
 
 def getPredictions(logits):
