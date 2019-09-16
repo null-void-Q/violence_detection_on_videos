@@ -13,7 +13,7 @@ def preprocess_input(img):
     return frame
 
 def readVideoClip(video_fragment, maxClipDuration = 64):
-     clip = []
+     clip = np.empty((maxClipDuration,224,224,3),dtype=np.float32)
      cap = cv2.VideoCapture(video_fragment['video'])
      if (cap.isOpened() == False): 
           print("Error opening video stream or file ",video_fragment['video'])
@@ -24,16 +24,16 @@ def readVideoClip(video_fragment, maxClipDuration = 64):
           ret, frame = cap.read()
           if ret == True:
                frame = preprocess_input(frame)
-               clip.append(frame)
+               clip[f] = frame
                f+=1
                if f > 63:
                    break  
           else:
                break
 
-     clip = np.asarray(clip, dtype=np.float32)
      if len(clip) < maxClipDuration :
-          tmp = np.zeros(shape=(maxClipDuration - len(clip),224,224,3),dtype=np.float32)
+          tmp = np.empty(shape=(maxClipDuration - len(clip),224,224,3),dtype=np.float32)
+          tmp.fill(-1.0)
           clip =np.concatenate((clip,tmp)) 
      return clip     
                        
