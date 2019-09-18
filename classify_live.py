@@ -3,11 +3,12 @@ import numpy as np
 from i3d_inception import Inception_Inflated3d
 from data import preprocess_input
 from utils import getPredictions, getTopNindecies
+from collections import deque 
 
 def main():
     clipDuration = 16
     memory =  25
-    preds = []
+    preds = deque([])
     clip = []
     prediction = {'label':'----', 'score':0.0}
 
@@ -20,7 +21,6 @@ def main():
     if (cap.isOpened()== False): 
         print("Error opening video stream or file")
     while(cap.isOpened()):
-        print(len(preds))
         ret, frame = cap.read()
         if ret == True:
             labeled = np.copy(frame)
@@ -36,8 +36,8 @@ def main():
                clip=[]
                i=0
             if preds_count == memory:
-                preds = []
-                preds_count = 0   
+                preds.popleft()
+                preds_count = memory-1   
         else:
             break
         key = cv2.waitKey(1)
