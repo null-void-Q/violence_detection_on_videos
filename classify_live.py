@@ -1,23 +1,31 @@
 import cv2
 import numpy as np
+import sys
 from i3d_inception import Inception_Inflated3d
 from data import preprocess_input
 from utils import getPredictions, getTopNindecies
 from collections import deque 
 
-def main():
+def main(videoPath = None):
     clipDuration = 16
     memory =  5
     preds = deque([])
     clip = []
+
+
     prediction = {'label':'----', 'score':0.0}
 
     kinetics_classes = [x.strip() for x in open('label_map.txt', 'r')]
 
     model = load_model(clipDuration)
+
     preds_count = 0
     i = 0
-    cap = cv2.VideoCapture(0)
+    if videoPath == None:
+        cap = cv2.VideoCapture(0)
+    else:
+        cap = cv2.VideoCapture(videoPath) 
+
     if (cap.isOpened()== False): 
         print("Error opening video stream or file")
     while(cap.isOpened()):
@@ -99,5 +107,8 @@ def write_label(frame, label):
 
 
 if __name__ == "__main__":
-   main()
+    if len(sys.argv) < 2:
+        main()
+    else:
+        main(sys.argv[1])     
 
