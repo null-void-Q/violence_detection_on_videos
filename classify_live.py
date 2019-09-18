@@ -7,7 +7,7 @@ from collections import deque
 
 def main():
     clipDuration = 16
-    memory =  25
+    memory =  5
     preds = deque([])
     clip = []
     prediction = {'label':'----', 'score':0.0}
@@ -63,7 +63,7 @@ def calculate_prediction(predictions, class_map):
     
     top1indices = getTopNindecies(final_prediction,1)
     index = top1indices[0]
-    return {'label': class_map[index], 'score':final_prediction[index]}
+    return {'label': class_map[index], 'score':round(final_prediction[index]*100,2)}
 
 def classify_clip(clip, model):
 
@@ -89,7 +89,7 @@ def write_label(frame, label):
 
     cv2.putText(
         frame,
-        str(label['score']), 
+        str(label['score'])+'%', 
         (50,50), 
         font, 
         fontScale,
