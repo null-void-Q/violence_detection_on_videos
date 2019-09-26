@@ -24,7 +24,7 @@ def meh(predictions, annotationList, classes, topNpredictions = 10):
         currentPredictions = []
         for index in topPredictions:
             label = classes[index]
-            score = currentVideo['predictions'][index].astype('float')
+            score = currentVideo['predictions'][index]
             currentPredictions.append({'label':label, 'score':score})
         vidPath = currentVideo['video'].split('/')
         video = vidPath[len(vidPath)-1][:-18]   
@@ -80,8 +80,8 @@ def test (model, testDirectory, classList, INPUT_FRAMES = 64, batchSize = 10):
     dataGenerator = DataGenerator(annotationList,INPUT_FRAMES,batch_size=batchSize)
     print('starting test...\n')
     out_logits = model.predict_generator(dataGenerator, steps=None, max_queue_size=10, workers=1, use_multiprocessing=False, verbose=1)
-    out_logits = out_logits[:len(annotationList)]
-    predictions = getPredictions(out_logits)
+    predictions = out_logits[:len(annotationList)]
+    #predictions = getPredictions(out_logits)
 
     output = meh(predictions,annotationList,classList)
     writeJsontoFile('results.json',output)
