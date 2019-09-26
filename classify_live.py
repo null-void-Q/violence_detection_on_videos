@@ -11,8 +11,12 @@ def main(videoPath = None):
     memory =  5
     preds = deque([])
     clip = []
+    threshold = 30
+    classesSubset = ['applauding','arm wrestling', 'clapping', 'drinking', 'drinking beer', 'finger snapping', 'laughing', 'pull ups',
+     'punching person (boxing)', 'push up', 'rock scissors paper','squat','texting','shaking hands','yawning']
 
 
+    defaultPred = {'label':'----', 'score':'----'}
     prediction = {'label':'----', 'score':0.0}
 
     kinetics_classes = [x.strip() for x in open('label_map.txt', 'r')]
@@ -32,7 +36,7 @@ def main(videoPath = None):
         ret, frame = cap.read()
         if ret == True:
             labeled = np.copy(frame)
-            write_label(labeled,prediction)
+            write_label(labeled,prediction,threshold,defaultPred,classesSubset)
             cv2.imshow('frame',labeled)
             frame = preprocess_input(frame)
             clip.append(frame)  
@@ -71,7 +75,9 @@ def calculate_prediction(predictions, class_map):
     
     top1indices = getTopNindecies(final_prediction,1)
     index = top1indices[0]
-    return {'label': class_map[index], 'score':round(final_prediction[index]*100,2)}
+    result =  {'label': class_map[index], 'score':round(final_prediction[index]*100,2)} 
+    print(result)
+    return result
 
 def classify_clip(clip, model):
 
@@ -81,12 +87,16 @@ def classify_clip(clip, model):
     predictions = predictions[0]
     return predictions                  
 
-def write_label(frame, label):
+def write_label(frame, prediction, threshold, defaultPred, classesSubset):
     font= cv2.FONT_HERSHEY_SIMPLEX
     bottomLeftCornerOfText = (50,20)
     fontScale              = 1
     fontColor              = (255,255,255)
     lineType               = 2
+    label = prediction
+
+    if label['score'] < threshold or not label['label'] in classesSubset :
+        label = defaultPred
 
     cv2.putText(frame,label['label'], 
         bottomLeftCornerOfText, 
@@ -111,4 +121,3 @@ if __name__ == "__main__":
         main()
     else:
         main(sys.argv[1])     
-
