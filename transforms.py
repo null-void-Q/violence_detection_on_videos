@@ -1,4 +1,5 @@
-
+import cv2
+import numpy as np
 
 def centerCrop(image,dim = 224):
     h,w = image.shape[:2]
