@@ -3,14 +3,9 @@ import cv2
 import numpy as np
 import math
 import os
-from utils import imageResize, centerCrop
+from transforms import preprocess_input 
 
 
-def preprocess_input(img):
-    frame = imageResize(img,256)
-    frame = centerCrop(frame,224)
-    frame = (frame/255.)*2 - 1  
-    return frame
 
 def readVideoClip(video_fragment, maxClipDuration = 64):
      clip = np.empty((maxClipDuration,224,224,3),dtype=np.float32)
@@ -33,7 +28,7 @@ def readVideoClip(video_fragment, maxClipDuration = 64):
 
      if len(clip) < maxClipDuration :
           tmp = np.empty(shape=(maxClipDuration - len(clip),224,224,3),dtype=np.float32)
-          tmp.fill(-1.0)
+          tmp.fill(1.0)
           clip =np.concatenate((clip,tmp)) 
      return clip     
                        
