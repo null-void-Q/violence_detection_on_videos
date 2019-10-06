@@ -1,6 +1,15 @@
 import cv2
 import numpy as np
 
+def loopVideo(clip,currentLength):
+    i = currentLength + 1
+    j = 0 
+    while(i < len(clip)):
+        clip[i] = np.copy(clip[j])
+        i+=1
+        j+=1
+    return clip    
+    
 def centerCrop(image,dim = 224):
     h,w = image.shape[:2]
     y = int((h - dim)/2)
@@ -25,8 +34,34 @@ def imageResize(image, dim, inter = cv2.INTER_LINEAR):
 
     return resized
 
+def turncateRange(matrix,minVal,maxVal):
+    matrix[matrix >= maxVal] = maxVal
+    matrix[matrix <= minVal] = minVal
+    return matrix
+
 def preprocess_input(img):
     frame = imageResize(img,256)
     frame = centerCrop(frame,224)
     frame = (frame/255.)*2 - 1  
     return frame
+
+def preprocess_input_opticalflow(frame, prevFrame, flowFunction, bins):
+    
+    
+    currFrame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY) 
+    currFrame = imageResize(currFrame,256)
+    currFrame = centerCrop(currFrame,224)
+    prevFrame = cv2.cvtColor(prevFrame, cv2.COLOR_RGB2GRAY) 
+    prevFrame = imageResize(prevFrame,256)
+    prevFrame = centerCrop(prevFrame,224)
+    
+    
+    opticalFlow = flowFunction.calc(prevFrame,currFrame,None)
+    assert(opticalFlow.dtype == np.float32)
+    
+    opticalFlow = turncateRange(opticalFlow,-20,20)
+    opticalFlow = np.digitize(opticalFlow, bins)
+    
+    opticalFlow = (opticalFlow/255.)*2-1
+    
+    return opticalFlow

@@ -3,11 +3,11 @@ import cv2
 import numpy as np
 import math
 import os
-from transforms import preprocess_input 
+from transforms import preprocess_input, loopVideo 
 
 
 
-def readVideoClip(video_fragment, maxClipDuration = 64):
+def readVideoClip(video_fragment, maxClipDuration):
      clip = np.empty((maxClipDuration,224,224,3),dtype=np.float32)
      cap = cv2.VideoCapture(video_fragment['video'])
      if (cap.isOpened() == False): 
@@ -25,12 +25,11 @@ def readVideoClip(video_fragment, maxClipDuration = 64):
                    break  
           else:
                break
-
-     if len(clip) < maxClipDuration :
-          tmp = np.empty(shape=(maxClipDuration - len(clip),224,224,3),dtype=np.float32)
-          tmp.fill(1.0)
-          clip =np.concatenate((clip,tmp)) 
-     return clip     
+     
+     #clip = clip[::-1]          
+     if f < maxClipDuration :
+          clip = loopVideo(clip,f)
+     return clip   
                        
 
 def extractClipsFromVideo(video, maxClipDuration, label):
@@ -98,6 +97,6 @@ class DataGenerator(keras.utils.Sequence):
            
             X[i] = readVideoClip(VID,self.numOfFrames)
 
-            y[i] = VID['label']
+            y[i] = int(VID['label'])
         
         return X, keras.utils.to_categorical(y, num_classes=self.n_classes)
