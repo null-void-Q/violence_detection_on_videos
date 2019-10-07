@@ -25,6 +25,7 @@ from keras import backend as K
 from data import DataGenerator
 from data import generateDatasetList
 from utils import getPredictions, getTopNindecies ,writeJsontoFile
+from finetuning import generateAnnotationList, generate_preprocessed_data, RGBDataGenerator
 
 
 INPUT_FRAMES = 64
@@ -36,7 +37,7 @@ NUM_FLOW_CHANNELS = 2
 NUM_CLASSES = 2
 
 kinetics_classes = [x.strip() for x in open('label_map.txt', 'r')]
-
+#generate_preprocessed_data('C:/Users/Void/Desktop/test_dir','C:/Users/Void/Desktop/test_dir_pp',64)
 rgb_model = Inception_Inflated3d(
                 include_top=False,
                 weights='rgb_imagenet_and_kinetics',
@@ -62,10 +63,11 @@ predictions = Activation('softmax', name='prediction')(x)
 model = Model(rgb_model.input, predictions)
 
 print('\n\n\ngenerating Annotation List...')
-datalist = generateDatasetList('/home/null/Desktop/HAR/test_dir/',INPUT_FRAMES)
+datalist = generateDatasetList('C:/Users/Void/Desktop/test_dir',INPUT_FRAMES)
+annoList = generateAnnotationList('C:/Users/Void/Desktop/test_dir_pp')
 #validlist = generateDatasetList('validDir',INPUT_FRAMES)
 print('creating data generator...')
-dataGenerator = DataGenerator(datalist,INPUT_FRAMES,batch_size=2,n_classes=NUM_CLASSES)
+dataGenerator = RGBDataGenerator(annoList,INPUT_FRAMES,batch_size=2,n_classes=NUM_CLASSES)
 #validdataGenerator = FlowDataGenerator(validlist,INPUT_FRAMES,batch_size= 10)
 print('starting...\n')
 
