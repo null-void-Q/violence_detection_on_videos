@@ -37,7 +37,7 @@ NUM_FLOW_CHANNELS = 2
 NUM_CLASSES = 2
 
 kinetics_classes = [x.strip() for x in open('label_map.txt', 'r')]
-#generate_preprocessed_data('C:/Users/Void/Desktop/test_dir','C:/Users/Void/Desktop/test_dir_pp',64)
+generate_preprocessed_data('C:/Users/Void/Desktop/test_dir','C:/Users/Void/Desktop/test_dir_pp',64)
 rgb_model = Inception_Inflated3d(
                 include_top=False,
                 weights='rgb_imagenet_and_kinetics',
