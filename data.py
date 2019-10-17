@@ -19,9 +19,9 @@ def readVideoClip(video_fragment, maxClipDuration):
           ret, frame = cap.read()
           if ret == True:
                frame = preprocess_input(frame)
-               clip[f] = frame
+               clip[f] = np.copy(frame)
                f+=1
-               if f > 63:
+               if f == maxClipDuration:
                    break  
           else:
                break

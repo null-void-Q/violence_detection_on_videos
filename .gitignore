@@ -1,0 +1,3 @@
+__pycache__
+model.hdf5
+train_history.json

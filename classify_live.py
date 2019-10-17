@@ -19,7 +19,7 @@ def main(videoPath = None):
     defaultPred = {'label':'----', 'score':'----'}
     prediction = {'label':'----', 'score':0.0}
 
-    kinetics_classes = [x.strip() for x in open('label_map.txt', 'r')]
+    kinetics_classes = ['N','V']
 
     model = load_model(clipDuration)
 
@@ -95,8 +95,8 @@ def write_label(frame, prediction, threshold, defaultPred, classesSubset):
     lineType               = 2
     label = prediction
 
-    if label['score'] < threshold or not label['label'] in classesSubset :
-        label = defaultPred
+    #if label['score'] < threshold or not label['label'] in classesSubset :
+        #label = defaultPred
 
     cv2.putText(frame,label['label'], 
         bottomLeftCornerOfText, 
