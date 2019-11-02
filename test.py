@@ -42,7 +42,6 @@ def generateFormatedOutput(predictions, annotationList, classes, topNpredictions
           
     return output        
             
-
 def test (model, testDirectory, classList, INPUT_FRAMES = 64, batchSize = 10):
         
     print('\n\n\ngenerating Annotation List...')
@@ -71,3 +70,15 @@ def testFlow (model, testDirectory, dataDir, classList, INPUT_FRAMES = 64, batch
     output = generateFormatedOutput(predictions,datalist,classList)
     writeJsontoFile('results.json',output)
     np.save('logits.npy', out_logits)
+
+def testViolence (model, testDirectory, classList, INPUT_FRAMES = 64, batchSize = 10):
+        
+    print('\n\n\ngenerating Annotation List...')
+    annotationList = generateDatasetList(testDirectory,INPUT_FRAMES)
+    print('creating data generator...')
+    dataGenerator = DataGenerator(annotationList,INPUT_FRAMES,batch_size=batchSize)
+    print('starting test...\n')
+    out_logits = model.predict_generator(dataGenerator, steps=None, max_queue_size=10, workers=1, use_multiprocessing=False, verbose=1)
+    predictions = out_logits[:len(annotationList)] 
+    output = generateFormatedOutput(predictions,annotationList,classList,topNpredictions=2)
+    writeJsontoFile('results.json',output)

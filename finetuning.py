@@ -1,4 +1,3 @@
-import keras
 import cv2
 import numpy as np
 import math
@@ -8,14 +7,16 @@ from transforms import loopVideo, preprocess_input
 from i3d_inception import Inception_Inflated3d,conv3d_bn
 from keras.models import Model
 from keras.layers import Activation
-from keras.layers import Dropout
+from keras.layers import Dropout,Dense,GlobalAveragePooling3D
 from keras.layers import Reshape
 from keras.layers import Lambda
-from keras.optimizers import SGD
+from keras.optimizers import SGD,Adam
 from utils import writeJsontoFile
 from keras.callbacks import EarlyStopping, ModelCheckpoint
+from keras import backend as K
+from keras.utils import to_categorical, Sequence
 
-def readClip(video_fragment, maxClipDuration):
+def readClip(video_fragment, maxClipDuration, augmentData=False):
     
     clip = np.empty((maxClipDuration,224,224,3),dtype=np.float32)
 
@@ -28,7 +29,7 @@ def readClip(video_fragment, maxClipDuration):
     while(cap.isOpened()):
           ret, frame = cap.read()
           if ret == True:
-               frame = preprocess_input(frame)
+               frame = preprocess_input(frame,augment = augmentData)
                clip[f] = np.copy(frame)
                f+=1
                if f == maxClipDuration:
@@ -40,11 +41,11 @@ def readClip(video_fragment, maxClipDuration):
         clip = loopVideo(clip,f)
     return clip   
 
-def generate_preprocessed_data(dataPath, saveDir ,maxClipDuration):
+def generate_preprocessed_data(dataPath, saveDir ,maxClipDuration,augmentData=False):
     clipList = generateDatasetList(dataPath, maxClipDuration)
     counter = 0
     for clip in clipList:
-        rgbClip = readClip(clip,maxClipDuration)
+        rgbClip = readClip(clip,maxClipDuration,augmentData)
         vidPath = clip['video'].split('/')
         videoName = vidPath[len(vidPath)-1][:-4]
         clipName = str(counter) + '+' + videoName + '+' + str(clip['start_frame']) + '+' + str(clip['label'])   
@@ -62,7 +63,8 @@ def generateAnnotationList(dataPath):
     return video_list
 
 
-class RGBDataGenerator(keras.utils.Sequence):
+
+class RGBDataGenerator(Sequence):
      
     def __init__(self, annotationList, numOfFrames=64 ,batch_size=32, dim=(224,224,3),
                  n_classes=400, shuffle=False):
@@ -103,11 +105,41 @@ class RGBDataGenerator(keras.utils.Sequence):
 
             y[i] = int(VID['label'])
         
-        return X, keras.utils.to_categorical(y, num_classes=self.n_classes)
-def loadModel(numberOfClasses,inputFrames, frameHeight,frameWidth,numRGBChannels):
+        return X, to_categorical(y, num_classes=self.n_classes)
+    
+def freezelayers(untilIndex,model):
+    for index,layer in enumerate(model.layers):
+        if index > untilIndex:
+            break
+        layer.trainable = False       
+    
+def loadModelLR(numberOfClasses,inputFrames, frameHeight,frameWidth,numRGBChannels,withWeights = False):
+    weights = None
+    if withWeights : weights = 'rgb_imagenet_and_kinetics'
     rgb_model = Inception_Inflated3d(
                 include_top=False,
-                weights='rgb_imagenet_and_kinetics',
+                weights=weights,
+                input_shape=(inputFrames, frameHeight, frameWidth, numRGBChannels),
+                dropout_prob=0.5,
+                endpoint_logit=True,
+                classes=numberOfClasses)
+    for layer in rgb_model.layers:
+        layer.trainable = False
+    x = rgb_model.output
+    x = GlobalAveragePooling3D()(x)
+    x = Dense(1024, activation='relu')(x)
+    predictions = Dense(numberOfClasses, activation='softmax')(x)
+    model = Model(rgb_model.input, predictions)
+    
+    return model
+
+
+def loadModel(numberOfClasses,inputFrames, frameHeight,frameWidth,numRGBChannels,withWeights = False):
+    weights = None
+    if withWeights : weights = 'rgb_imagenet_and_kinetics'
+    rgb_model = Inception_Inflated3d(
+                include_top=False,
+                weights=weights,
                 input_shape=(inputFrames, frameHeight, frameWidth, numRGBChannels),
                 dropout_prob=0.5,
                 endpoint_logit=True,
@@ -129,23 +161,26 @@ def loadModel(numberOfClasses,inputFrames, frameHeight,frameWidth,numRGBChannels
     predictions = Activation('softmax', name='prediction')(x)
     model = Model(rgb_model.input, predictions)
     
-    return model
+    return model    
     
-    
-def finetune(trainData,validData,numberOfClasses,inputFrames, frameHeight,frameWidth,numRGBChannels):                    
-    model = loadModel(numberOfClasses,inputFrames, frameHeight,frameWidth,numRGBChannels)
-    
-    optimizer = SGD(momentum=0.6)
+def finetune(trainData,validData,numberOfClasses,inputFrames,
+              frameHeight,frameWidth,
+              numRGBChannels,epochs): 
+                       
+    model = loadModel(numberOfClasses,inputFrames, frameHeight,frameWidth,numRGBChannels, withWeights=False)
+    freezelayers(152,model)
+    model.load_weights('model_F152_3.hdf5')
+    #optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, amsgrad=True)
+    optimizer = SGD(momentum=0.9,decay=1e-7)
     model.compile(optimizer, loss='binary_crossentropy', metrics=['acc'])
     
-    #for layer in model.layers:
-        #layer.trainable = False
+
 
 
     earlystop = EarlyStopping(monitor='val_loss', min_delta=0.05, patience=3, verbose=1, mode='auto', baseline=None, restore_best_weights=True)
-    model_checkpoint = ModelCheckpoint('model.hdf5', monitor='loss',verbose=1, save_best_only=True)
+    model_checkpoint = ModelCheckpoint('model.hdf5', monitor='val_loss',verbose=1, save_best_only=True)
 
-    res = model.fit_generator(trainData, epochs=14, 
+    res = model.fit_generator(trainData, epochs=epochs, 
                             verbose=1, callbacks=[earlystop, model_checkpoint],
                             validation_data=validData,
                             shuffle=False)
@@ -154,7 +189,8 @@ def finetune(trainData,validData,numberOfClasses,inputFrames, frameHeight,frameW
     
     
 def finetuneDefault(trainDataPath,validDataPath,numberOfClasses ,inputFrames,
-                     frameHeight,frameWidth,numRGBChannels,batchSize=2):
+                     frameHeight,frameWidth,
+                     numRGBChannels,batchSize=2, epochs=5):
 
     print('\n\n\ngenerating Annotation List...')
     annoList = generateAnnotationList(trainDataPath)
@@ -164,4 +200,4 @@ def finetuneDefault(trainDataPath,validDataPath,numberOfClasses ,inputFrames,
     validDataGenerator = RGBDataGenerator(annoList2,inputFrames,batch_size=batchSize,n_classes=numberOfClasses)
     print('starting...\n')
     
-    finetune(dataGenerator,validDataGenerator,numberOfClasses,inputFrames, frameHeight,frameWidth,numRGBChannels)      
+    finetune(dataGenerator,validDataGenerator,numberOfClasses,inputFrames, frameHeight,frameWidth,numRGBChannels,epochs)      
