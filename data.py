@@ -104,3 +104,4 @@ class DataGenerator(keras.utils.Sequence):
             y[i] = int(VID['label'])
         
         return X, keras.utils.to_categorical(y, num_classes=self.n_classes)
+

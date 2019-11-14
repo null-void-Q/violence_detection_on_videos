@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from keras.preprocessing.image import random_rotation
 def loopVideo(clip,currentLength):
-    i = currentLength + 1
+    i = currentLength
     j = 0 
     while(i < len(clip)):
         clip[i] = np.copy(clip[j])

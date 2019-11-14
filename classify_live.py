@@ -2,26 +2,28 @@ import cv2
 import numpy as np
 import sys
 from i3d_inception import Inception_Inflated3d
+from argparse import ArgumentParser
 from data import preprocess_input
 from utils import getPredictions, getTopNindecies
 from collections import deque 
+from finetuning import loadModel
 
-def main(videoPath = None):
-    clipDuration = 16
-    memory =  5
+
+
+clipDuration = 16
+memory =  5 
+threshold = 30
+
+
+def main(videoPath,classes_list,model):
+
     preds = deque([])
     clip = []
-    threshold = 30
-    classesSubset = ['applauding','arm wrestling', 'clapping', 'drinking', 'drinking beer', 'finger snapping', 'laughing', 'pull ups',
-     'punching person (boxing)', 'push up', 'rock scissors paper','squat','texting','shaking hands','yawning']
+
 
 
     defaultPred = {'label':'----', 'score':'----'}
     prediction = {'label':'----', 'score':0.0}
-
-    kinetics_classes = ['N','V']
-
-    model = load_model(clipDuration)
 
     preds_count = 0
     i = 0
@@ -36,14 +38,14 @@ def main(videoPath = None):
         ret, frame = cap.read()
         if ret == True:
             labeled = np.copy(frame)
-            write_label(labeled,prediction,threshold,defaultPred,classesSubset)
+            write_label(labeled,prediction,threshold,defaultPred,classes_list)
             cv2.imshow('frame',labeled)
             frame = preprocess_input(frame)
             clip.append(frame)  
             i+=1
             if(i == clipDuration):
                preds.append(classify_clip(clip,model))
-               prediction = calculate_prediction(preds,kinetics_classes)
+               prediction = calculate_prediction(preds,classes_list)
                preds_count += 1
                clip=[]
                i=0
@@ -57,17 +59,9 @@ def main(videoPath = None):
             break
    
 
-def load_model(clipDuration):
-
-    rgb_model = Inception_Inflated3d(
-                include_top=True,
-                weights='rgb_imagenet_and_kinetics',
-                input_shape=(clipDuration, 224, 224, 3),
-                classes=400)
-    return rgb_model
 
 def calculate_prediction(predictions, class_map):
-    final_prediction= np.zeros((400))
+    final_prediction= np.zeros((len(class_map)))
     for pred in predictions:
         final_prediction+=pred
     final_prediction/=len(predictions)
@@ -83,7 +77,7 @@ def classify_clip(clip, model):
 
     clip = np.expand_dims(clip,axis=0)
     out_logits = model.predict(clip, batch_size=len(clip), verbose=0, steps=None)
-    predictions = getPredictions(out_logits)
+    predictions = out_logits
     predictions = predictions[0]
     return predictions                  
 
@@ -117,7 +111,27 @@ def write_label(frame, prediction, threshold, defaultPred, classesSubset):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        main()
+
+    parser = ArgumentParser()
+    parser.add_argument("-s", "--source", dest="source",
+                        help="the source of the stream/path to video - if empty then the default web cam will be used")
+    parser.add_argument("-l", "--labels", dest="labels", required=True,
+                        help="path to labels text file")
+    parser.add_argument("-m", "--model", dest="model",
+                        help="path to model weights")                    
+
+    args = parser.parse_args()
+
+    labels = [x.strip() for x in open(args.labels)]
+
+    if not args.model:
+        model = Inception_Inflated3d(include_top=True,
+                                        weights='rgb_imagenet_and_kinetics',
+                                        input_shape=(clipDuration,224,224,3),
+                                        classes=400,
+                                        endpoint_logit=False)
     else:
-        main(sys.argv[1])     
+        model = loadModel(len(labels),clipDuration,224,224,3)
+        model.load_weights(args.model)                                    
+
+    main(args.source,labels,model)

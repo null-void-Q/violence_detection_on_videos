@@ -24,8 +24,8 @@ NUM_CLASSES = 2
 #generate_preprocessed_data('/run/media/null/56A1-8324/Real_Life_Violence_Dataset/validation/','/run/media/null/HDD/Real_Life_Violence_Dataset/preprocessed_valid/',64)
 
 
-finetuneDefault('/run/media/null/56A1-8324/Real_Life_Violence_Dataset/preprocessed_train/',
-                '/run/media/null/56A1-8324/Real_Life_Violence_Dataset/preprocessed_valid/',
+finetuneDefault('D:/Graduation_Project/Datasets\ -\ Application/Real\ Life\ Violence\ Situations/Real\ Life\ Violence\ Dataset',
+                None,
                 NUM_CLASSES,INPUT_FRAMES,
                 FRAME_HEIGHT,FRAME_WIDTH,
                 NUM_RGB_CHANNELS,batchSize=2, epochs=1)
