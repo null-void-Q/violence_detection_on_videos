@@ -35,7 +35,7 @@ def classify(videoPath, model):
 
     video = readVideo(videoPath)
     out_logits = model.predict(video, batch_size=len(video), verbose=0, steps=None)
-    predictions = getPredictions(out_logits)
+    predictions = out_logits
     print('Top 5 predictions: ')
     final_prediction = np.zeros(len(predictions[0]))
     for pred in predictions:
@@ -54,5 +54,6 @@ if __name__ == "__main__":
                 include_top=True,
                 weights='rgb_inception_i3d',
                 input_shape=(64, 224, 224, 3),
-                classes=400)
+                classes=400,
+                endpoint_logit=False)
       classify(videoPath,rgb_model)
