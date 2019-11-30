@@ -115,7 +115,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("-s", "--source", dest="source",
                         help="the source of the stream/path to video - if empty then the default web cam will be used")
-    parser.add_argument("-l", "--labels", dest="labels", required=True,
+    parser.add_argument("-l", "--labels", dest="labels",
                         help="path to labels text file")
     parser.add_argument("-m", "--model", dest="model",
                         help="path to model weights")                    
@@ -126,7 +126,7 @@ if __name__ == "__main__":
 
     if not args.model:
         model = Inception_Inflated3d(include_top=True,
-                                        weights='rgb_imagenet_and_kinetics',
+                                        weights='rgb_inception_i3d',
                                         input_shape=(clipDuration,224,224,3),
                                         classes=400,
                                         endpoint_logit=False)

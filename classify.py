@@ -52,7 +52,7 @@ if __name__ == "__main__":
       videoPath = sys.argv[1]
       rgb_model = Inception_Inflated3d(
                 include_top=True,
-                weights='rgb_imagenet_and_kinetics',
+                weights='rgb_inception_i3d',
                 input_shape=(64, 224, 224, 3),
                 classes=400)
       classify(videoPath,rgb_model)

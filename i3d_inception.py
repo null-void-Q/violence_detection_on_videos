@@ -33,22 +33,18 @@ from keras.utils import layer_utils
 from keras.utils.data_utils import get_file
 from keras import backend as K
 
-WEIGHTS_NAME = ['rgb_kinetics_only', 'flow_kinetics_only', 'rgb_imagenet_and_kinetics', 'flow_imagenet_and_kinetics']
+WEIGHTS_NAME = ['rgb_inception_i3d', 'flow_inception_i3d']
 
 # path to pretrained models with top (classification layer)
 WEIGHTS_PATH = {
-    'rgb_kinetics_only' : 'https://github.com/dlpbc/keras-kinetics-i3d/releases/download/v0.2/rgb_inception_i3d_kinetics_only_tf_dim_ordering_tf_kernels.h5',
-    'flow_kinetics_only' : 'https://github.com/dlpbc/keras-kinetics-i3d/releases/download/v0.2/flow_inception_i3d_kinetics_only_tf_dim_ordering_tf_kernels.h5',
-    'rgb_imagenet_and_kinetics' : 'https://github.com/dlpbc/keras-kinetics-i3d/releases/download/v0.2/rgb_inception_i3d_imagenet_and_kinetics_tf_dim_ordering_tf_kernels.h5',
-    'flow_imagenet_and_kinetics' : 'https://github.com/dlpbc/keras-kinetics-i3d/releases/download/v0.2/flow_inception_i3d_imagenet_and_kinetics_tf_dim_ordering_tf_kernels.h5'
+    'rgb_inception_i3d': 'https://drive.google.com/uc?export=download&id=1JnqeLIM1izoccgz60fQJSWxuI00nf0_N',
+    'flow_inception_i3d' : 'https://drive.google.com/uc?export=download&id=1YTik34v8jgPoN4UAF0k-g1rIqvwzuWrr'
 }
 
 # path to pretrained models with no top (no classification layer)
 WEIGHTS_PATH_NO_TOP = {
-    'rgb_kinetics_only' : 'https://github.com/dlpbc/keras-kinetics-i3d/releases/download/v0.2/rgb_inception_i3d_kinetics_only_tf_dim_ordering_tf_kernels_no_top.h5',
-    'flow_kinetics_only' : 'https://github.com/dlpbc/keras-kinetics-i3d/releases/download/v0.2/flow_inception_i3d_kinetics_only_tf_dim_ordering_tf_kernels_no_top.h5',
-    'rgb_imagenet_and_kinetics' : 'https://github.com/dlpbc/keras-kinetics-i3d/releases/download/v0.2/rgb_inception_i3d_imagenet_and_kinetics_tf_dim_ordering_tf_kernels_no_top.h5',
-    'flow_imagenet_and_kinetics' : 'https://github.com/dlpbc/keras-kinetics-i3d/releases/download/v0.2/flow_inception_i3d_imagenet_and_kinetics_tf_dim_ordering_tf_kernels_no_top.h5'
+    'rgb_inception_i3d': 'https://drive.google.com/uc?export=download&id=1l9GCEXncV8Izp905g6U-FMw01KKwLYga',
+    'flow_inception_i3d' : 'https://drive.google.com/uc?export=download&id=1nRzNQYMgmPfv6OyYVBh10wa9rOEqwnfs'
 }
 
 
@@ -74,9 +70,8 @@ def _obtain_input_shape(input_shape,
         require_flatten: whether the model is expected to
             be linked to a classifier via a Flatten layer.
         weights: one of `None` (random initialization)
-            or 'kinetics_only' (pre-training on Kinetics dataset).
-            or 'imagenet_and_kinetics' (pre-training on ImageNet and Kinetics datasets).
-            If weights='kinetics_only' or weights=='imagenet_and_kinetics' then
+            or 'kinetics (pre-training on Kinetics dataset with imagenet weights).
+            If weights='kinetics' then
             input channels must be equal to 3.
 
     # Returns
@@ -85,7 +80,7 @@ def _obtain_input_shape(input_shape,
     # Raises
         ValueError: in case of invalid argument values.
     """
-    if weights != 'kinetics_only' and weights != 'imagenet_and_kinetics' and input_shape and len(input_shape) == 4:
+    if weights != 'kinetics' and input_shape and len(input_shape) == 4:
         if data_format == 'channels_first':
             if input_shape[0] not in {1, 3}:
                 warnings.warn(
@@ -105,7 +100,7 @@ def _obtain_input_shape(input_shape,
             default_shape = (3, default_num_frames, default_frame_size, default_frame_size)
         else:
             default_shape = (default_num_frames, default_frame_size, default_frame_size, 3)
-    if (weights == 'kinetics_only' or weights == 'imagenet_and_kinetics') and require_flatten:
+    if (weights == 'kinetics') and require_flatten:
         if input_shape is not None:
             if input_shape != default_shape:
                 raise ValueError('When setting`include_top=True` '
@@ -120,7 +115,7 @@ def _obtain_input_shape(input_shape,
                 if len(input_shape) != 4:
                     raise ValueError(
                         '`input_shape` must be a tuple of four integers.')
-                if input_shape[0] != 3 and (weights == 'kinetics_only' or weights == 'imagenet_and_kinetics'):
+                if input_shape[0] != 3 and (weights == 'kinetics'):
                     raise ValueError('The input must have 3 channels; got '
                                      '`input_shape=' + str(input_shape) + '`')
 
@@ -139,7 +134,7 @@ def _obtain_input_shape(input_shape,
                 if len(input_shape) != 4:
                     raise ValueError(
                         '`input_shape` must be a tuple of four integers.')
-                if input_shape[-1] != 3 and (weights == 'kinetics_only' or weights == 'imagenet_and_kinetics'):
+                if input_shape[-1] != 3 and (weights == 'kinetics'):
                     raise ValueError('The input must have 3 channels; got '
                                      '`input_shape=' + str(input_shape) + '`')
 
@@ -251,8 +246,7 @@ def Inception_Inflated3d(include_top=True,
         include_top: whether to include the the classification 
             layer at the top of the network.
         weights: one of `None` (random initialization)
-            or 'kinetics_only' (pre-training on Kinetics dataset only).
-            or 'imagenet_and_kinetics' (pre-training on ImageNet and Kinetics datasets).
+            or 'kinetics' (pre-training on Kinetics dataset and imagenet).
         input_tensor: optional Keras tensor (i.e. output of `layers.Input()`)
             to use as image input for the model.
         input_shape: optional shape tuple, only to be specified
@@ -524,37 +518,21 @@ def Inception_Inflated3d(include_top=True,
 
     # load weights
     if weights in WEIGHTS_NAME:
-        if weights == WEIGHTS_NAME[0]:   # rgb_kinetics_only
+        if weights == WEIGHTS_NAME[0]:   # rgb_kinetics
             if include_top:
-                weights_url = WEIGHTS_PATH['rgb_kinetics_only']
-                model_name = 'i3d_inception_rgb_kinetics_only.h5'
+                weights_url = WEIGHTS_PATH['rgb_inception_i3d']
+                model_name = 'i3d_inception_rgb.h5'
             else:
-                weights_url = WEIGHTS_PATH_NO_TOP['rgb_kinetics_only']
-                model_name = 'i3d_inception_rgb_kinetics_only_no_top.h5'
+                weights_url = WEIGHTS_PATH_NO_TOP['rgb_inception_i3d']
+                model_name = 'i3d_inception_rgb_no_top.h5'
 
-        elif weights == WEIGHTS_NAME[1]: # flow_kinetics_only
+        elif weights == WEIGHTS_NAME[1]: # flow_kinetics
             if include_top:
-                weights_url = WEIGHTS_PATH['flow_kinetics_only']
-                model_name = 'i3d_inception_flow_kinetics_only.h5'
+                weights_url = WEIGHTS_PATH['flow_inception_i3dy']
+                model_name = 'i3d_inception_flow.h5'
             else:
-                weights_url = WEIGHTS_PATH_NO_TOP['flow_kinetics_only']
-                model_name = 'i3d_inception_flow_kinetics_only_no_top.h5'
-
-        elif weights == WEIGHTS_NAME[2]: # rgb_imagenet_and_kinetics
-            if include_top:
-                weights_url = WEIGHTS_PATH['rgb_imagenet_and_kinetics']
-                model_name = 'i3d_inception_rgb_imagenet_and_kinetics.h5'
-            else:
-                weights_url = WEIGHTS_PATH_NO_TOP['rgb_imagenet_and_kinetics']
-                model_name = 'i3d_inception_rgb_imagenet_and_kinetics_no_top.h5'
-
-        elif weights == WEIGHTS_NAME[3]: # flow_imagenet_and_kinetics
-            if include_top:
-                weights_url = WEIGHTS_PATH['flow_imagenet_and_kinetics']
-                model_name = 'i3d_inception_flow_imagenet_and_kinetics.h5'
-            else:
-                weights_url = WEIGHTS_PATH_NO_TOP['flow_imagenet_and_kinetics']
-                model_name = 'i3d_inception_flow_imagenet_and_kinetics_no_top.h5'
+                weights_url = WEIGHTS_PATH_NO_TOP['flow_inception_i3dy']
+                model_name = 'i3d_inception_flow_no_top.h5'
 
         downloaded_weights_path = get_file(model_name, weights_url, cache_subdir='models')
         model.load_weights(downloaded_weights_path)

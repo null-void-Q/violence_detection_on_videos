@@ -115,7 +115,7 @@ def freezelayers(untilIndex,model):
     
 def loadModelLR(numberOfClasses,inputFrames, frameHeight,frameWidth,numRGBChannels,withWeights = False):
     weights = None
-    if withWeights : weights = 'rgb_imagenet_and_kinetics'
+    if withWeights : weights = 'rgb_inception_i3d'
     rgb_model = Inception_Inflated3d(
                 include_top=False,
                 weights=weights,
@@ -136,7 +136,7 @@ def loadModelLR(numberOfClasses,inputFrames, frameHeight,frameWidth,numRGBChanne
 
 def loadModel(numberOfClasses,inputFrames, frameHeight,frameWidth,numRGBChannels,withWeights = False):
     weights = None
-    if withWeights : weights = 'rgb_imagenet_and_kinetics'
+    if withWeights : weights = 'rgb_inception_i3d'
     rgb_model = Inception_Inflated3d(
                 include_top=False,
                 weights=weights,
