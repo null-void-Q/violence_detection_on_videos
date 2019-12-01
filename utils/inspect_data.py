@@ -17,7 +17,11 @@ undere30 = 0
 undere20 = 0
 undere50 = 0
 above = 0
- 
+outdrs = ['10','20','30','50','other']
+for di in outdrs:
+    if not os.path.exists(dataPath+di):
+        os.makedirs(dataPath+di)
+            
 for vid in videos:    
     print('inspecting ... ',vid)
     cap = cv2.VideoCapture(dataPath+vid)
@@ -35,17 +39,24 @@ for vid in videos:
     x = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
     
     resolution = (x,y)
+    cap.release()
     # ------------------
     
     if duration <= 10:
         undere10+=1
+        os.rename(dataPath+vid, dataPath+outdrs[0]+'/'+vid) 
     elif duration <=20:
-        undere20+=1    
+        undere20+=1  
+        os.rename(dataPath+vid, dataPath+outdrs[1]+'/'+vid)  
     elif duration <=30:
         undere30+=1
+        os.rename(dataPath+vid, dataPath+outdrs[2]+'/'+vid)
     elif duration <=50:
         undere50+=1
-    else : above+=1
+        os.rename(dataPath+vid, dataPath+outdrs[3]+'/'+vid)
+    else : 
+        above+=1
+        os.rename(dataPath+vid, dataPath+outdrs[4]+'/'+vid)
     
     
 print('10 or less: ',undere10)

@@ -3,7 +3,7 @@ import numpy as np
 import sys
 from i3d_inception import Inception_Inflated3d
 from argparse import ArgumentParser
-from data import preprocess_input
+from transforms import preprocess_input
 from utils import getPredictions, getTopNindecies
 from collections import deque 
 from finetuning import loadModel
@@ -13,7 +13,6 @@ from finetuning import loadModel
 clipDuration = 16
 memory =  5 
 threshold = 30
-
 
 def main(videoPath,classes_list,model):
 
