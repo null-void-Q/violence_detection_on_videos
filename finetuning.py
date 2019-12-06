@@ -67,7 +67,7 @@ def generateAnnotationList(dataPath):
 class RGBDataGenerator(Sequence):
      
     def __init__(self, annotationList, numOfFrames=64 ,batch_size=32, dim=(224,224,3),
-                 n_classes=400, shuffle=False):
+                 n_classes=400, shuffle=False, just_load = False, augment = False):
        
         self.dim = dim
         self.numOfFrames = numOfFrames
@@ -75,6 +75,8 @@ class RGBDataGenerator(Sequence):
         self.annotationList = annotationList
         self.n_classes = n_classes
         self.shuffle = shuffle
+        self.just_load = just_load
+        self.augment = augment
         self.on_epoch_end()
 
     def __len__(self):
@@ -101,11 +103,22 @@ class RGBDataGenerator(Sequence):
  
         for i, VID in enumerate(tmpAnnoList):
             
-            X[i] = np.load(VID['clip'])
-
+            if self.just_load:
+                X[i] = np.load(VID['clip'])
+            else:
+                X[i] = readClip(VID,self.numOfFrames,self.augment)
             y[i] = int(VID['label'])
         
         return X, to_categorical(y, num_classes=self.n_classes)
+    
+    
+    
+#######################################################################################
+
+# Model Section
+  
+  
+    
     
 def freezelayers(untilIndex,model):
     for index,layer in enumerate(model.layers):

@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from keras.preprocessing.image import random_rotation
+from keras.preprocessing.image import random_rotation, apply_brightness_shift
 def loopVideo(clip,currentLength):
     i = currentLength
     j = 0 
@@ -38,15 +38,16 @@ def turncateRange(matrix,minVal,maxVal):
     matrix[matrix >= maxVal] = maxVal
     matrix[matrix <= minVal] = minVal
     return matrix
-def augmentFrame(img):
+def augmentFrame(img, brightness):
     frame = random_rotation(img,15,row_axis=0,col_axis=1,channel_axis=2)
+    frame = apply_brightness_shift(frame,brightness)
     return frame
 
-def preprocess_input(img, augment=False):
+def preprocess_input(img, augment=False, brightness = None):
     frame = imageResize(img,256)
     frame = centerCrop(frame,224)
     
-    if augment: frame = augmentFrame(frame)
+    if augment: frame = augmentFrame(frame,brightness)
     
     frame = (frame/255.)*2 - 1  
     return frame
