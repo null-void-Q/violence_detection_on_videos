@@ -52,7 +52,7 @@ def generateDatasetList(datasetPath, maxClipDuration, classList = []):
      video_list = []
      for path, subdirs, files in os.walk(datasetPath):
           for file in files:
-              video_list+= extractClipsFromVideo(os.path.join(path,file),maxClipDuration, classList.index(path.split('/')[-1]))
+              video_list+= extractClipsFromVideo(os.path.join(path,file),maxClipDuration, classList.index(path.replace('\\','/').split('/')[-1]))
      
      return video_list
 

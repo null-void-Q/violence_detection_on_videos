@@ -21,8 +21,10 @@ from keras.utils import to_categorical, Sequence
 def readClip(video_fragment, maxClipDuration, augmentData=False):
     
     clip = np.empty((maxClipDuration,224,224,3),dtype=np.float32)
-    if augmentData:
+    b = 0
+    if augmentData and random.randint(0,101) > 60:
         b = random.randint(-50,51)
+
     cap = cv2.VideoCapture(video_fragment['video'])
     if (cap.isOpened() == False): 
           print("Error opening video stream or file ",video_fragment['video'])
