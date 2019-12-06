@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from keras.preprocessing.image import random_rotation, apply_brightness_shift
+from keras.preprocessing.image import random_rotation
 def loopVideo(clip,currentLength):
     i = currentLength
     j = 0 
@@ -16,6 +16,8 @@ def centerCrop(image,dim = 224):
     x = int((w-dim)/2)
     return image[y:(dim+y), x:(dim+x)]  
 
+def adjustContrast(img, brightness, alpha = 1.0): # brightness [0-100] alpha [1.0-3.0]
+    return cv2.convertScaleAbs(img, alpha=alpha, beta=brightness)
 
 def imageResize(image, dim, inter = cv2.INTER_LINEAR):
 
@@ -40,7 +42,7 @@ def turncateRange(matrix,minVal,maxVal):
     return matrix
 def augmentFrame(img, brightness):
     frame = random_rotation(img,15,row_axis=0,col_axis=1,channel_axis=2)
-    frame = apply_brightness_shift(frame,brightness)
+    frame = adjustContrast(frame,brightness)
     return frame
 
 def preprocess_input(img, augment=False, brightness = None):

@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 import math
 import os
+import random
+import time
 from data import generateDatasetList
 from transforms import loopVideo, preprocess_input
 from i3d_inception import Inception_Inflated3d,conv3d_bn
@@ -19,7 +21,8 @@ from keras.utils import to_categorical, Sequence
 def readClip(video_fragment, maxClipDuration, augmentData=False):
     
     clip = np.empty((maxClipDuration,224,224,3),dtype=np.float32)
-
+    if augmentData:
+        b = random.randint(-50,51)
     cap = cv2.VideoCapture(video_fragment['video'])
     if (cap.isOpened() == False): 
           print("Error opening video stream or file ",video_fragment['video'])
@@ -29,7 +32,7 @@ def readClip(video_fragment, maxClipDuration, augmentData=False):
     while(cap.isOpened()):
           ret, frame = cap.read()
           if ret == True:
-               frame = preprocess_input(frame,augment = augmentData)
+               frame = preprocess_input(frame,augment = augmentData, brightness=b)
                clip[f] = np.copy(frame)
                f+=1
                if f == maxClipDuration:
@@ -78,6 +81,7 @@ class RGBDataGenerator(Sequence):
         self.just_load = just_load
         self.augment = augment
         self.on_epoch_end()
+        random.seed(time.time())
 
     def __len__(self):
         return int(np.floor(len(self.annotationList) / self.batch_size))
