@@ -1,4 +1,4 @@
-from finetuning import RGBDataGenerator, loadModel, freezelayers
+from finetuning import RGBDataGenerator, loadModel, freezelayers, generateAnnotationList
 from keras.optimizers import Adam,SGD
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from data import generateDatasetList
@@ -25,12 +25,14 @@ epochs = 1
 
 
 print('\n\n\ngenerating Annotation Lists...')
-training_annotation_list = generateDatasetList(trainDataPath,NUM_OF_FRAMES,classList=classList)
-validation_annotation_list = generateDatasetList(validDataPath,NUM_OF_FRAMES,classList=classList)
+training_annotation_list = generateAnnotationList(trainDataPath)
+validation_annotation_list = generateAnnotationList(validDataPath)
+#training_annotation_list = generateDatasetList(trainDataPath,NUM_OF_FRAMES,classList=classList)
+#validation_annotation_list = generateDatasetList(validDataPath,NUM_OF_FRAMES,classList=classList)
 print('creating data generator...')
 trainDataGenerator = RGBDataGenerator(training_annotation_list,NUM_OF_FRAMES,batch_size=batchSize,
-                                        n_classes=len(classList),shuffle=True,augment= True)
-validDataGenerator = RGBDataGenerator(validation_annotation_list,NUM_OF_FRAMES,batch_size=batchSize,n_classes=len(classList))
+                                        n_classes=len(classList),shuffle=True,just_load=True)
+validDataGenerator = RGBDataGenerator(validation_annotation_list,NUM_OF_FRAMES,batch_size=batchSize,n_classes=len(classList),just_load=True)
 
 print('Building Model ...')
 

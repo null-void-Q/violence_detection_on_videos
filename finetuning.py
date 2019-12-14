@@ -46,8 +46,8 @@ def readClip(video_fragment, maxClipDuration, augmentData=False):
         clip = loopVideo(clip,f)
     return clip   
 
-def generate_preprocessed_data(dataPath, saveDir ,maxClipDuration,augmentData=False):
-    clipList = generateDatasetList(dataPath, maxClipDuration)
+def generate_preprocessed_data(dataPath, saveDir ,maxClipDuration,labelList,augmentData=False):
+    clipList = generateDatasetList(dataPath, maxClipDuration,classList=labelList)
     counter = 0
     for clip in clipList:
         rgbClip = readClip(clip,maxClipDuration,augmentData)
