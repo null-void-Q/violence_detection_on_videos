@@ -31,7 +31,7 @@ validation_annotation_list = generateAnnotationList(validDataPath)
 #validation_annotation_list = generateDatasetList(validDataPath,NUM_OF_FRAMES,classList=classList)
 print('creating data generator...')
 trainDataGenerator = RGBDataGenerator(training_annotation_list,NUM_OF_FRAMES,batch_size=batchSize,
-                                        n_classes=len(classList),shuffle=True,just_load=True)
+                                        n_classes=len(classList),shuffle=True,just_load=True,augment=True)
 validDataGenerator = RGBDataGenerator(validation_annotation_list,NUM_OF_FRAMES,batch_size=batchSize,n_classes=len(classList),just_load=True)
 
 print('Building Model ...')

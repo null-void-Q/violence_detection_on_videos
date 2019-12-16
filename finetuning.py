@@ -5,7 +5,7 @@ import os
 import random
 import time
 from data import generateDatasetList
-from transforms import loopVideo, preprocess_input
+from transforms import loopVideo, preprocess_input,augmentFrame
 from i3d_inception import Inception_Inflated3d,conv3d_bn
 from keras.models import Model
 from keras.layers import Activation
@@ -67,7 +67,11 @@ def generateAnnotationList(dataPath):
           
     return video_list
 
-
+def augmentClip(clip):
+    b = 0
+    for i,frame in enumerate(clip):
+        b = random.randint(-50,51)
+        clip[i] = augmentFrame(frame,b)
 
 class RGBDataGenerator(Sequence):
      
@@ -111,6 +115,11 @@ class RGBDataGenerator(Sequence):
             
             if self.just_load:
                 X[i] = np.load(VID['clip'])
+                
+                if self.augment and random.randint(0,101) > 50:
+                    clip =  (((X[i]+1)/2)*255).astype(np.uint8)
+                    augmentClip(clip)
+                    X[i] = (clip/255.)*2 - 1 
             else:
                 X[i] = readClip(VID,self.numOfFrames,self.augment)
             y[i] = int(VID['label'])
