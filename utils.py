@@ -2,6 +2,9 @@ import numpy as np
 import json
 import cv2
 
+def readLabels(file_path):
+    return sorted([x.strip() for x in open(file_path)])
+    
 def writeJsontoFile(fileName, jsonArray):
     with open(fileName, 'w') as f: 
             json.dump(jsonArray, f, indent=4)  

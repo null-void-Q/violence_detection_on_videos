@@ -5,7 +5,7 @@ import os
 import random
 import time
 from data import generateDatasetList
-from transforms import loopVideo, preprocess_input,augmentFrame
+from transforms import loopVideo, preprocess_input
 from i3d_inception import Inception_Inflated3d,conv3d_bn
 from keras.models import Model
 from keras.layers import Activation
@@ -21,9 +21,8 @@ from keras.utils import to_categorical, Sequence
 def readClip(video_fragment, maxClipDuration, augmentData=False):
     
     clip = np.empty((maxClipDuration,224,224,3),dtype=np.float32)
-    b = 0
-    if augmentData and random.randint(0,101) > 60:
-        b = random.randint(-50,51)
+
+    b = random.randint(-50,51)
 
     cap = cv2.VideoCapture(video_fragment['video'])
     if (cap.isOpened() == False): 

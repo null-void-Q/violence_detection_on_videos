@@ -1,6 +1,7 @@
 import moviepy.editor as mp
 import sys
 import os
+import time
 directory = sys.argv[1]
 
 
@@ -14,6 +15,7 @@ for dirpath, dirnames, filenames in os.walk(directory):
 for i,gif in enumerate(gifs):        
     clip = mp.VideoFileClip(gif)
     clip.write_videofile(gif[:-4]+".mp4")
+    time.sleep(0.1)
     os.remove(gif)
 
     

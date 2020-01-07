@@ -3,3 +3,6 @@ __pycache__
 *.json
 .vscode
 main.py
+tmp.py
+checkpoints
+history

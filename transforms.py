@@ -9,7 +9,17 @@ def loopVideo(clip,currentLength):
         i+=1
         j+=1
     return clip    
-    
+
+def randomCrop(image,dim=224):
+    max_x = image.shape[1] - dim
+    max_y = image.shape[0] - dim
+
+    x = np.random.randint(0, max_x)
+    y = np.random.randint(0, max_y)
+
+    crop = image[y: y + dim, x: x + dim]
+    return crop
+
 def centerCrop(image,dim = 224):
     h,w = image.shape[:2]
     y = int((h - dim)/2)
@@ -36,23 +46,29 @@ def imageResize(image, dim, inter = cv2.INTER_LINEAR):
 
     return resized
 
-def turncateRange(matrix,minVal,maxVal):
-    matrix[matrix >= maxVal] = maxVal
-    matrix[matrix <= minVal] = minVal
-    return matrix
+
 def augmentFrame(img, brightness):
-    frame = random_rotation(img,15,row_axis=0,col_axis=1,channel_axis=2)
+    frame = random_rotation(img,20,row_axis=0,col_axis=1,channel_axis=2)
     frame = adjustContrast(frame,brightness)
     return frame
 
 def preprocess_input(img, augment=False, brightness = None):
     frame = imageResize(img,256)
-    frame = centerCrop(frame,224)
-    
-    if augment: frame = augmentFrame(frame,brightness)
-    
+    if augment: 
+        frame = randomCrop(frame,dim=224) 
+        frame = augmentFrame(frame,brightness)
+    else:
+        frame = centerCrop(frame,224)
     frame = (frame/255.)*2 - 1  
     return frame
+
+
+
+def turncateRange(matrix,minVal,maxVal):
+    matrix[matrix >= maxVal] = maxVal
+    matrix[matrix <= minVal] = minVal
+    return matrix
+    
 
 def preprocess_input_opticalflow(frame, prevFrame, flowFunction, bins):
     
