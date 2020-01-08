@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from keras.preprocessing.image import random_rotation,random_zoom
+from keras.preprocessing.image import random_rotation
 def loopVideo(clip,currentLength):
     i = currentLength
     j = 0 
@@ -49,7 +49,6 @@ def imageResize(image, dim, inter = cv2.INTER_LINEAR):
 
 def augmentFrame(img, brightness):
     frame = random_rotation(img,20,row_axis=0,col_axis=1,channel_axis=2)
-    frame = random_zoom(frame,[0.5,1],row_axis=0,col_axis=1,channel_axis=2)
     frame = adjustContrast(frame,brightness)
     return frame
 
