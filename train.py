@@ -49,14 +49,14 @@ def main(trainDataPath,validDataPath,classList,freeze_layers,batchSize,
     model.compile(optimizer, loss=lossfn, metrics=['acc'])
 
     #earlystop = EarlyStopping(monitor='val_loss', min_delta=0.05, patience=3, verbose=1, mode='auto', baseline=None, restore_best_weights=True)
-    checkpointPath= './checkpoints/model_'+('adam' if Adam  else 'sgd')+str(learning_rate)+'_freeze'+str(freeze_layers)+'-{epoch:02d}-{val_acc:.2f}.hdf5'
+    checkpointPath= './checkpoints/model_'+('adam' if Adam  else 'sgd')+str(learning_rate)+('_aug' if augment else '')+'_freeze'+str(freeze_layers)+'-{epoch:02d}-{val_acc:.2f}.hdf5'
     model_checkpoint = ModelCheckpoint(checkpointPath, monitor='loss',verbose=1, save_best_only=True)
 
     res = model.fit_generator(trainDataGenerator, epochs=epochs, 
                             verbose=1, callbacks=[model_checkpoint],
                             validation_data=validDataGenerator,
                             shuffle=False)
-    writeJsontoFile('./history/training_history'+('adam' if Adam else 'sgd')+str(learning_rate)+'_freeze'+str(freeze_layers)+'.json',res.history)
+    writeJsontoFile('./history/training_history'+('adam' if Adam else 'sgd')+str(learning_rate)+('_aug' if augment else '')+'_freeze'+str(freeze_layers)+'.json',res.history)
     
 
 if __name__ == "__main__":
