@@ -1,6 +1,7 @@
 import numpy as np
 import argparse
 from data import DataGenerator
+from finetuning import RGBDataGenerator
 from data import generateDatasetList
 from data_flow import generateAnnotationList, FlowDataGenerator
 from utils import getPredictions, getTopNindecies ,writeJsontoFile,readLabels
@@ -40,7 +41,7 @@ def testViolence (model, testDirectory, classList, INPUT_FRAMES = 64, batchSize 
     print('\n\n\ngenerating Annotation List...')
     annotationList = generateDatasetList(testDirectory,INPUT_FRAMES,classList=classList)
     print('creating data generator...')
-    dataGenerator = DataGenerator(annotationList,INPUT_FRAMES,batch_size=batchSize)
+    dataGenerator = RGBDataGenerator(annotationList,INPUT_FRAMES,batch_size=batchSize,n_classes=len(classList))
     print('starting test...\n')
     out_logits = model.predict_generator(dataGenerator, steps=None, max_queue_size=10, workers=1, use_multiprocessing=False, verbose=1)
     predictions = out_logits[:len(annotationList)] 

@@ -150,8 +150,7 @@ def loadModelLR(numberOfClasses,inputFrames, frameHeight,frameWidth,numRGBChanne
                 dropout_prob=0.5,
                 endpoint_logit=True,
                 classes=numberOfClasses)
-    for layer in rgb_model.layers:
-        layer.trainable = False
+    
     x = rgb_model.output
     x = GlobalAveragePooling3D()(x)
     x = Dense(1024, activation='relu')(x)

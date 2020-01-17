@@ -4,7 +4,7 @@ import sys
 from i3d_inception import Inception_Inflated3d
 from argparse import ArgumentParser
 from transforms import preprocess_input
-from utils import getPredictions, getTopNindecies
+from utils import getPredictions, getTopNindecies,readLabels
 from collections import deque 
 from finetuning import loadModel
 
@@ -117,12 +117,19 @@ if __name__ == "__main__":
     parser.add_argument("-l", "--labels", dest="labels",
                         help="path to labels text file")
     parser.add_argument("-m", "--model", dest="model",
-                        help="path to model weights")                    
-
+                        help="path to model weights")  
+    parser.add_argument("-f", "--input_frames", dest="input_frames",
+                        help="clip size",type =int,default=32)                      
+    parser.add_argument("-m", "--memory", dest="memory",
+                        help="memory -> for fusion",type=int,default=5)  
+    parser.add_argument("-t", "--threshold", dest="threshold",
+                        help="prediction threshold",type=float,default=0.5)                          
     args = parser.parse_args()
 
-    labels = [x.strip() for x in open(args.labels)]
-
+    labels = readLabels(args.labels)
+    clipDuration = args.input_frames
+    memory = args.memory
+    threshold = args.threshold
     if not args.model:
         model = Inception_Inflated3d(include_top=True,
                                         weights='rgb_inception_i3d',
