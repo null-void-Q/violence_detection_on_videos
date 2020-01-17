@@ -1,4 +1,4 @@
-from finetuning import RGBDataGenerator, loadModel, freezelayers, generateAnnotationList
+from finetuning import RGBDataGenerator, loadModel, loadModelLR, freezelayers, generateAnnotationList
 from keras.optimizers import Adam,SGD
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from data import generateDatasetList
@@ -30,8 +30,8 @@ def main(trainDataPath,validDataPath,classList,freeze_layers,batchSize,
     validDataGenerator = RGBDataGenerator(validation_annotation_list,NUM_OF_FRAMES,batch_size=batchSize,n_classes=len(classList),just_load=preprocessed)
 
     print('Building Model ...')
-
-    model = loadModel(len(classList),NUM_OF_FRAMES, FRAME_HEIGHT,FRAME_WIDTH,NUM_CHANNELS, withWeights=True)
+    #TODO change load model function
+    model = loadModelLR(len(classList),NUM_OF_FRAMES, FRAME_HEIGHT,FRAME_WIDTH,NUM_CHANNELS, withWeights=True)
 
     freezelayers(freeze_layers,model)
 
