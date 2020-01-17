@@ -152,7 +152,7 @@ def loadModelLR(numberOfClasses,inputFrames, frameHeight,frameWidth,numRGBChanne
                 classes=numberOfClasses)
     
     x = rgb_model.output
-    x = GlobalAveragePooling3D()(x)
+    x = Dropout(0.5)(x)
     x = Dense(1024, activation='relu')(x)
     predictions = Dense(numberOfClasses, activation='softmax')(x)
     model = Model(rgb_model.input, predictions)
