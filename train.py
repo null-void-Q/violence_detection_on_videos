@@ -31,7 +31,7 @@ def main(trainDataPath,validDataPath,classList,freeze_layers,batchSize,
 
     print('Building Model ...')
     #TODO change load model function
-    model = loadModelLR(len(classList),NUM_OF_FRAMES, FRAME_HEIGHT,FRAME_WIDTH,NUM_CHANNELS, withWeights=True)
+    model = loadModel(len(classList),NUM_OF_FRAMES, FRAME_HEIGHT,FRAME_WIDTH,NUM_CHANNELS, withWeights=True)
 
     freezelayers(freeze_layers,model)
 
