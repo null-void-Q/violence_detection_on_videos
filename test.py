@@ -36,12 +36,12 @@ def testFlow (model, testDirectory, dataDir, classList, INPUT_FRAMES = 64, batch
     writeJsontoFile('results.json',output)
     np.save('logits.npy', out_logits)
 
-def testViolence (model, testDirectory, classList, INPUT_FRAMES = 64, batchSize = 10,results_path='results.json'):
+def testViolence (model, testDirectory, classList, INPUT_FRAMES = 64, batchSize = 10,results_path='results.json',just_load=False):
         
     print('\n\n\ngenerating Annotation List...')
     annotationList = generateDatasetList(testDirectory,INPUT_FRAMES,classList=classList)
     print('creating data generator...')
-    dataGenerator = RGBDataGenerator(annotationList,INPUT_FRAMES,batch_size=batchSize,n_classes=len(classList))
+    dataGenerator = RGBDataGenerator(annotationList,INPUT_FRAMES,batch_size=batchSize,n_classes=len(classList),just_load=just_load)
     print('starting test...\n')
     out_logits = model.predict_generator(dataGenerator, steps=None, max_queue_size=10, workers=1, use_multiprocessing=False, verbose=1)
     predictions = out_logits[:len(annotationList)] 
@@ -105,9 +105,13 @@ if __name__ == "__main__":
     parser.add_argument(
         '-b', '--batch_size', type=int, default=8, help='batch size for testing.')
     parser.add_argument(
-        '-r', '--results_path',default='results.json', help='name/path of the output results of the test(has to be a json file -> results.json)')
+        '-r', '--results_path',default='./results/results.json', help='name/path of the output results of the test(has to be a json file -> ./results/results.json)')
+    parser.add_argument(
+        '-p', '--data_preprocessed',action='store_true', default=False,help='if data is preprocessed')
     args = parser.parse_args()
     
+    if not os.path.exists('./results'):
+        os.makedirs('./results')
 
     labels = readLabels(args.labels)
     num_classes = len(labels)
@@ -122,6 +126,6 @@ if __name__ == "__main__":
         model.load_weights(args.weights)                                    
 
     if num_classes != 400:
-        testViolence (model, args.data_directory, labels, args.input_frames, args.batch_size,results_path=args.results_path)
+        testViolence (model, args.data_directory, labels, args.input_frames, args.batch_size,results_path=args.results_path,just_load=args.data_preprocessed)
     else:
         test(model, args.data_directory, labels, args.input_frames, args.batch_size)
