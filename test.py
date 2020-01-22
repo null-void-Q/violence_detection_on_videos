@@ -39,7 +39,10 @@ def testFlow (model, testDirectory, dataDir, classList, INPUT_FRAMES = 64, batch
 def testViolence (model, testDirectory, classList, INPUT_FRAMES = 64, batchSize = 10,results_path='results.json',just_load=False):
         
     print('\n\n\ngenerating Annotation List...')
-    annotationList = generateDatasetList(testDirectory,INPUT_FRAMES,classList=classList)
+    if just_load:
+        annotationList = generateAnnotationList(testDirectory)
+    else:    
+        annotationList = generateDatasetList(testDirectory,INPUT_FRAMES,classList=classList)
     print('creating data generator...')
     dataGenerator = RGBDataGenerator(annotationList,INPUT_FRAMES,batch_size=batchSize,n_classes=len(classList),just_load=just_load)
     print('starting test...\n')
