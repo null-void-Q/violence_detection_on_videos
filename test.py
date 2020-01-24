@@ -1,11 +1,13 @@
 import numpy as np
 import argparse
+import os
 from data import DataGenerator
 from finetuning import RGBDataGenerator
 from data import generateDatasetList
 from data_flow import generateAnnotationList, FlowDataGenerator
 from utils import getPredictions, getTopNindecies ,writeJsontoFile,readLabels
 from finetuning import loadModel
+from i3d_inception import Inception_Inflated3d
 
 def test (model, testDirectory, classList, INPUT_FRAMES = 64, batchSize = 10):
         
@@ -36,7 +38,7 @@ def testFlow (model, testDirectory, dataDir, classList, INPUT_FRAMES = 64, batch
     writeJsontoFile('results.json',output)
     np.save('logits.npy', out_logits)
 
-def testViolence (model, testDirectory, classList, INPUT_FRAMES = 64, batchSize = 10,results_path='results.json',just_load=False):
+def testViolence (model, testDirectory, classList, INPUT_FRAMES = 64, batchSize = 10,results_path='results.json',just_load=False,perClip=False):
         
     print('\n\n\ngenerating Annotation List...')
     if just_load:
@@ -47,9 +49,30 @@ def testViolence (model, testDirectory, classList, INPUT_FRAMES = 64, batchSize 
     dataGenerator = RGBDataGenerator(annotationList,INPUT_FRAMES,batch_size=batchSize,n_classes=len(classList),just_load=just_load)
     print('starting test...\n')
     out_logits = model.predict_generator(dataGenerator, steps=None, max_queue_size=10, workers=1, use_multiprocessing=False, verbose=1)
-    predictions = out_logits[:len(annotationList)] 
-    output = generateFormatedOutput(predictions,annotationList,classList,topNpredictions=len(classList),format=-4)
+    predictions = out_logits[:len(annotationList)]
+    if perClip:
+        output = gfo_clips(predictions,annotationList,classList)
+    else:     
+        output = generateFormatedOutput(predictions,annotationList,classList,topNpredictions=len(classList),format=-4)
     writeJsontoFile(results_path,output)
+
+def gfo_clips(predictions, annotationList, classes):
+    output = []
+    for i,p in enumerate(predictions):
+        topPredictions = getTopNindecies(p, 2)
+        trueLabel = classes[int(annotationList[i]['label'])]
+        currentPredictions = []
+        for index in topPredictions:
+            label = classes[index]
+            score = float(p[index])
+            currentPredictions.append({'label':label, 'score':score})
+        output.append({'video': annotationList[i]['video'],
+                        'clip_frame':str(annotationList[i]['start_frame']),
+                          'label': classes[topPredictions[0]],
+                           'true_label':trueLabel,
+                           'predictions': currentPredictions
+                           })
+    return output   
 
 def generateFormatedOutput(predictions, annotationList, classes, topNpredictions = 10,format=-18):
     output= []
@@ -111,6 +134,8 @@ if __name__ == "__main__":
         '-r', '--results_path',default='./results/results.json', help='name/path of the output results of the test(has to be a json file -> ./results/results.json)')
     parser.add_argument(
         '-p', '--data_preprocessed',action='store_true', default=False,help='if data is preprocessed')
+    parser.add_argument(
+        '-c', '--per_clip',action='store_true', default=False,help='results for clips not videos')
     args = parser.parse_args()
     
     if not os.path.exists('./results'):
@@ -129,6 +154,6 @@ if __name__ == "__main__":
         model.load_weights(args.weights)                                    
 
     if num_classes != 400:
-        testViolence (model, args.data_directory, labels, args.input_frames, args.batch_size,results_path=args.results_path,just_load=args.data_preprocessed)
+        testViolence (model, args.data_directory, labels, args.input_frames, args.batch_size,results_path=args.results_path,just_load=args.data_preprocessed,perClip=args.per_clip)
     else:
         test(model, args.data_directory, labels, args.input_frames, args.batch_size)

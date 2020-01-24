@@ -57,7 +57,8 @@ def main():
     precision = tp/(tp+fp)
     recall = tp/(tp+fn)
     f1 = 2*(precision*recall/(precision+recall))
-    print('Accuracy: ', t1Acc, ' - Precision:', precision,' - Recall:', recall,' - F1:', f1,' - Videos:', numOfVideos)        
+    print('Accuracy: ', t1Acc, ' - Precision:', precision,' - Recall:', recall,' - F1:', f1,' - Videos:', numOfVideos)
+    print('TP:',tp,' FP:',fp,'TN:',tn,' FN:',fn)        
                 
         
 
