@@ -48,7 +48,7 @@ def testViolence (model, testDirectory, classList, INPUT_FRAMES = 64, batchSize 
     print('creating data generator...')
     dataGenerator = RGBDataGenerator(annotationList,INPUT_FRAMES,batch_size=batchSize,n_classes=len(classList),just_load=just_load)
     print('starting test...\n')
-    out_logits = model.predict_generator(dataGenerator, steps=None, max_queue_size=10, workers=1, use_multiprocessing=False, verbose=1)
+    out_logits = model.predict_generator(dataGenerator, steps=None, max_queue_size=10, workers=1, use_multiprocessing=True, verbose=1)
     predictions = out_logits[:len(annotationList)]
     if perClip:
         output = gfo_clips(predictions,annotationList,classList)
