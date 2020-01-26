@@ -41,6 +41,7 @@ def testFlow (model, testDirectory, dataDir, classList, INPUT_FRAMES = 64, batch
 def testViolence (model, testDirectory, classList, INPUT_FRAMES = 64, batchSize = 10,results_path="results.json",just_load=False,perClip=False):
         
     print("\n\n\ngenerating Annotation List...")
+    annotationList = []
     if just_load:
         annotationList = generateAnnotationList(testDirectory)
     else:    
@@ -48,8 +49,8 @@ def testViolence (model, testDirectory, classList, INPUT_FRAMES = 64, batchSize 
     print("creating data generator...")
     dataGenerator = RGBDataGenerator(annotationList,INPUT_FRAMES,batch_size=batchSize,n_classes=len(classList),just_load=just_load)
     print("starting test...\n")
-    out_logits = model.predict_generator(dataGenerator, steps=None, max_queue_size=10, workers=16, use_multiprocessing=False, verbose=1)
-    predictions = out_logits[:len(annotationList)]
+    out_logits = model.predict_generator(dataGenerator, steps=None, max_queue_size=20, workers=16, use_multiprocessing=False, verbose=1)
+    predictions = out_logits
     if perClip:
         output = gfo_clips(predictions,annotationList,classList)
     else:     
