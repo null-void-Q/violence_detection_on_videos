@@ -13,7 +13,7 @@ def main():
     threshold = 0.0
     nThreshold = 0.0
     if len(sys.argv) > 2:
-        if len(sys.argv) == 2:
+        if len(sys.argv) == 3:
             threshold = float(sys.argv[2])
         else:
             threshold = float(sys.argv[2])
